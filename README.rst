@@ -2,14 +2,16 @@
 sqlgrep
 =======
 
-
-Add a short description here!
-
+This tool allows to analyze directory trees using sql syntax.
 
 Description
 ===========
 
-A longer description of your project goes here...
+To run tests:
+
+```
+python setup.py test
+```
 
 
 Note
