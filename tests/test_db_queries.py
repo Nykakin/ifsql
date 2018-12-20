@@ -2,13 +2,6 @@ import pytest
 
 
 @pytest.fixture
-def database():
-    import sqlgrep.database
-
-    return sqlgrep.database.Database()
-
-
-@pytest.fixture
 def filesystem():
     import os
     import tempfile

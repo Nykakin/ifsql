@@ -9,3 +9,10 @@ def database():
     import sqlgrep.database
 
     return sqlgrep.database.Database()
+
+
+@pytest.fixture
+def parser():
+    import sqlgrep.parser
+
+    return sqlgrep.parser.Parser()

@@ -5,10 +5,11 @@ import stat
 
 import sqlalchemy
 import sqlalchemy.ext.declarative
+import sqlalchemy.sql
 import sqlalchemy.orm
 
-Base = sqlalchemy.ext.declarative.declarative_base()
 
+Base = sqlalchemy.ext.declarative.declarative_base()
 
 class File(Base):
     __tablename__ = "files"
@@ -16,6 +17,7 @@ class File(Base):
 
     file_id = sqlalchemy.Column(sqlalchemy.Integer(), primary_key=True)
     file_name = sqlalchemy.Column(sqlalchemy.String())
+    file_path = sqlalchemy.Column(sqlalchemy.String())
     file_type = sqlalchemy.Column(sqlalchemy.String(1))
     file_size = sqlalchemy.Column(sqlalchemy.Integer())
     access_time = sqlalchemy.Column(sqlalchemy.DateTime())
@@ -136,11 +138,11 @@ class Database:
         self._session = Session()
         self._path_id_cache = {}
 
-    def insert_file(self, path, parent):
-        f = File(file_name=path, **analyse_file(path))
+    def insert_file(self, path, name, parent):
+        f = File(file_name=name, file_path=path, **analyse_file(os.path.join(path, name)))
         self._session.add(f)
         self._session.flush()
-        self._path_id_cache[path] = f.file_id
+
         p = Relation(ancestor_id=f.file_id, descendant_id=f.file_id, path_length=0)
         self._session.add(p)
         self._session.flush()
@@ -159,17 +161,49 @@ class Database:
         return f
 
     def walk(self, fs):
-        parent = None
+        parent_node = None
         for root, _, files in os.walk(fs):
-            parent = self.insert_file(root, parent)
+            if parent_node is None:
+                parent_node = self.insert_file(root, ".", None)
+                self._path_id_cache["."] = parent_node.file_id
+            else:
+                parent_node = self.insert_file(os.path.dirname(root), os.path.basename(root), parent_node)
+                self._path_id_cache[root] = parent_node.file_id
 
             for name in files:
-                self.insert_file(os.path.join(root, name), parent)
+                self.insert_file(root, name, parent_node)
 
     def path_id(self, path):
         return self._path_id_cache[path]
 
+    def parse_query(self, query):
+        return "new_query", "table_bame"
+
     def query(self, query):
+      
+
+# SELECT k.*
+# FROM Komentarze AS k
+# JOIN SciezkiDrzewa AS s ON k.id_komentarza = s.potomek
+# WHERE s.przodek = 4;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         pass
 
     @property

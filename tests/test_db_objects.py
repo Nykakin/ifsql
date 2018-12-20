@@ -2,13 +2,6 @@ import pytest
 
 
 @pytest.fixture
-def database():
-    import sqlgrep.database
-
-    return sqlgrep.database.Database()
-
-
-@pytest.fixture
 def filesystem():
     import os
     import tempfile
@@ -32,16 +25,19 @@ def test_files(filesystem, database):
     files = database.files.all()
 
     paths = (
-        filesystem,
-        os.path.join(filesystem, "subdir1"),
-        os.path.join(filesystem, "subdir1/subdir2"),
-        os.path.join(filesystem, "subdir1/subdir2/test_file"),
+        (filesystem, "."),
+        (filesystem, "subdir1"),
+        (os.path.join(filesystem, "subdir1"), "subdir2"),
+        (os.path.join(filesystem, "subdir1/subdir2"), "test_file"),
     )
 
-    for i, path in enumerate(paths):
+    for i, (file_path, file_name) in enumerate(paths):
+        path = os.path.join(file_path, file_name)
+
         assert files[i].owner_id == os.getuid()
         assert files[i].group_id == os.getgid()
-        assert files[i].file_name == path
+        assert files[i].file_path == file_path
+        assert files[i].file_name == file_name
         assert datetime.datetime.now() - files[i].access_time < datetime.timedelta(
             seconds=1
         )
@@ -63,12 +59,10 @@ def test_relations(filesystem, database):
     database.walk(filesystem)
     relations = database.relations.all()
 
-    filesystem_id = database.path_id(filesystem)
+    filesystem_id = database.path_id(".")
     subdir1_id = database.path_id(os.path.join(filesystem, "subdir1"))
     subdir2_id = database.path_id(os.path.join(filesystem, "subdir1/subdir2"))
-    test_file_id = database.path_id(
-        os.path.join(filesystem, "subdir1/subdir2/test_file")
-    )
+    test_file_id = database.files.filter(sqlgrep.database.File.file_name=="test_file").first().file_id
 
     expected_relations = (
         (filesystem_id, filesystem_id, 0),
