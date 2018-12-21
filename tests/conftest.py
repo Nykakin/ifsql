@@ -6,13 +6,13 @@ import pytest
 
 @pytest.fixture
 def database():
-    import sqlgrep.database
+    import ifsql.database
 
-    return sqlgrep.database.Database()
+    return ifsql.database.Database()
 
 
 @pytest.fixture
 def parser():
-    import sqlgrep.parser
+    import ifsql.parser
 
-    return sqlgrep.parser.Parser()
+    return ifsql.parser.Parser()

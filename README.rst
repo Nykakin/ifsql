@@ -1,8 +1,8 @@
 =======
-sqlgrep
+ifsql
 =======
 
-This tool allows to analyze directory trees using sql syntax.
+Allows to analyze filesystem using sql calls.
 
 Description
 ===========

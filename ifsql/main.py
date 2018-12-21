@@ -5,8 +5,8 @@ import argparse
 import sys
 import logging
 
-from sqlgrep import database
-from sqlgrep import __version__
+from ifsql import database
+from ifsql import __version__
 
 __author__ = "Nykakin"
 __copyright__ = "Nykakin"
@@ -28,7 +28,7 @@ def parse_args(args):
         description="Analyzing directory structure with sql calls"
     )
     parser.add_argument(
-        "--version", action="version", version="sqlgrep {ver}".format(ver=__version__)
+        "--version", action="version", version="ifsql {ver}".format(ver=__version__)
     )
     parser.add_argument(
         "-v",

@@ -19,7 +19,7 @@ def test_files(filesystem, database):
     import datetime
     import os
     import os.path
-    import sqlgrep.database
+    import ifsql.database
 
     database.walk(filesystem)
     files = database.files.all()
@@ -54,7 +54,7 @@ def test_files(filesystem, database):
 
 def test_relations(filesystem, database):
     import os
-    import sqlgrep.database
+    import ifsql.database
 
     database.walk(filesystem)
     relations = database.relations.all()
@@ -62,7 +62,7 @@ def test_relations(filesystem, database):
     filesystem_id = database.path_id(".")
     subdir1_id = database.path_id(os.path.join(filesystem, "subdir1"))
     subdir2_id = database.path_id(os.path.join(filesystem, "subdir1/subdir2"))
-    test_file_id = database.files.filter(sqlgrep.database.File.file_name=="test_file").first().file_id
+    test_file_id = database.files.filter(ifsql.database.File.file_name=="test_file").first().file_id
 
     expected_relations = (
         (filesystem_id, filesystem_id, 0),
@@ -78,7 +78,7 @@ def test_relations(filesystem, database):
     )
 
     for i, relation in enumerate(relations):
-        expected_relation = sqlgrep.database.Relation(
+        expected_relation = ifsql.database.Relation(
             ancestor_id=expected_relations[i][0],
             descendant_id=expected_relations[i][1],
             path_length=expected_relations[i][2],
