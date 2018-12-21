@@ -1,8 +1,3 @@
-import datetime
-import os
-import os.path
-import stat
-
 import sqlalchemy
 import sqlalchemy.ext.declarative
 import sqlalchemy.sql
@@ -38,6 +33,7 @@ class File(Base):
         fields = (
             "file_id",
             "file_name",
+            "file_path",
             "file_type",
             "file_size",
             "access_time",
@@ -100,46 +96,15 @@ class Relation(Base):
         return "Relation({})".format(", ".join(args))
 
 
-def file_type(mode):
-    if stat.S_ISDIR(mode):
-        return "D"
-    if stat.S_ISREG(mode):
-        return "F"
-    if stat.S_ISCHR(mode):
-        return "C"
-    if stat.S_ISBLK(mode):
-        return "B"
-    if stat.S_ISFIFO(mode):
-        return "N"
-    if stat.S_ISLNK(mode):
-        return "L"
-    if stat.S_ISSOCK(mode):
-        return "S"
-
-
-def analyse_file(path):
-    result = os.stat(path)
-
-    return {
-        "file_type": file_type(result.st_mode),
-        "file_size": result.st_size,
-        "access_time": datetime.datetime.fromtimestamp(result.st_atime),
-        "modification_time": datetime.datetime.fromtimestamp(result.st_mtime),
-        "owner_id": result.st_uid,
-        "group_id": result.st_gid,
-    }
-
-
 class Database:
     def __init__(self):
         engine = sqlalchemy.create_engine("sqlite:///:memory:")
         Base.metadata.create_all(engine)
         Session = sqlalchemy.orm.sessionmaker(bind=engine)
         self._session = Session()
-        self._path_id_cache = {}
 
-    def insert_file(self, path, name, parent):
-        f = File(file_name=name, file_path=path, **analyse_file(os.path.join(path, name)))
+    def insert_file(self, data, parent):
+        f = File(**data)
         self._session.add(f)
         self._session.flush()
 
@@ -160,50 +125,11 @@ class Database:
                 self._session.flush()
         return f
 
-    def walk(self, fs):
-        parent_node = None
-        for root, _, files in os.walk(fs):
-            if parent_node is None:
-                parent_node = self.insert_file(root, ".", None)
-                self._path_id_cache["."] = parent_node.file_id
-            else:
-                parent_node = self.insert_file(os.path.dirname(root), os.path.basename(root), parent_node)
-                self._path_id_cache[root] = parent_node.file_id
-
-            for name in files:
-                self.insert_file(root, name, parent_node)
-
-    def path_id(self, path):
-        return self._path_id_cache[path]
-
-    def parse_query(self, query):
-        return "new_query", "table_bame"
-
-    def query(self, query):
-      
-
+    def query(self, query): 
 # SELECT k.*
 # FROM Komentarze AS k
 # JOIN SciezkiDrzewa AS s ON k.id_komentarza = s.potomek
 # WHERE s.przodek = 4;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         pass
 
     @property

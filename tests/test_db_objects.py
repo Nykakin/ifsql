@@ -20,8 +20,10 @@ def test_files(filesystem, database):
     import os
     import os.path
     import ifsql.database
+    import ifsql.analyse
 
-    database.walk(filesystem)
+    path_id_cache = {}
+    ifsql.analyse.walk(filesystem, database, path_id_cache)
     files = database.files.all()
 
     paths = (
@@ -55,13 +57,16 @@ def test_files(filesystem, database):
 def test_relations(filesystem, database):
     import os
     import ifsql.database
+    import ifsql.analyse
 
-    database.walk(filesystem)
+    path_id_cache = {}
+    ifsql.analyse.walk(filesystem, database, path_id_cache)
+
     relations = database.relations.all()
 
-    filesystem_id = database.path_id(".")
-    subdir1_id = database.path_id(os.path.join(filesystem, "subdir1"))
-    subdir2_id = database.path_id(os.path.join(filesystem, "subdir1/subdir2"))
+    filesystem_id = path_id_cache["."]
+    subdir1_id = path_id_cache[os.path.join(filesystem, "subdir1")]
+    subdir2_id = path_id_cache[os.path.join(filesystem, "subdir1/subdir2")]
     test_file_id = database.files.filter(ifsql.database.File.file_name=="test_file").first().file_id
 
     expected_relations = (

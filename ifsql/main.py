@@ -5,7 +5,7 @@ import argparse
 import sys
 import logging
 
-from ifsql import database
+from ifsql import cmd
 from ifsql import __version__
 
 __author__ = "Nykakin"
@@ -74,8 +74,7 @@ def run():
     Entry point for console_scripts
     """
     main(sys.argv[1:])
-    db = database.Database()
-    db.walk(".")
+    c = cmd.Cmd()
 
 
 if __name__ == "__main__":
