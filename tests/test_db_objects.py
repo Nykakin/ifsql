@@ -54,34 +54,60 @@ def test_files(filesystem, database):
             assert files[i].file_type == "D"
 
 
-def test_relations(filesystem, database):
-    import os
+def test_relations(fs, database):
     import ifsql.database
     import ifsql.analyse
 
+    fs.add_directory("subdir1")
+    fs.add_directory("subdir2")
+    fs.add_directory("subdir2/subdir3")
+    fs.add_file(path="file1", size=100)
+    fs.add_file(path="subdir1/file2", size=200)
+    fs.add_file(path="subdir1/file3", size=300)
+    fs.add_file(path="subdir2/file4", size=400)
+    fs.add_file(path="subdir2/subdir3/file5", size=500)
+
     path_id_cache = {}
-    ifsql.analyse.walk(filesystem, database, path_id_cache)
+    ifsql.analyse.walk(fs.root, database, path_id_cache)
 
-    relations = database.relations.all()
-
-    filesystem_id = path_id_cache["."]
-    subdir1_id = path_id_cache[os.path.join(filesystem, "subdir1")]
-    subdir2_id = path_id_cache[os.path.join(filesystem, "subdir1/subdir2")]
-    test_file_id = database.files.filter(ifsql.database.File.file_name=="test_file").first().file_id
-
+    file_map = {f.file_name: f.file_id for f in database.files.all()}
     expected_relations = (
-        (filesystem_id, filesystem_id, 0),
-        (subdir1_id, subdir1_id, 0),
-        (filesystem_id, subdir1_id, 1),
-        (subdir2_id, subdir2_id, 0),
-        (subdir1_id, subdir2_id, 1),
-        (filesystem_id, subdir2_id, 2),
-        (test_file_id, test_file_id, 0),
-        (subdir2_id, test_file_id, 1),
-        (subdir1_id, test_file_id, 2),
-        (filesystem_id, test_file_id, 3),
+        # .
+        (file_map["."], file_map["."], 0),
+        # file1
+        (file_map["file1"], file_map["file1"], 1),
+        (file_map["."], file_map["file1"], 1),
+        # subdir1
+        (file_map["subdir1"], file_map["subdir1"], 0),
+        (file_map["."], file_map["subdir1"], 1),
+        # file2
+        (file_map["file2"], file_map["file2"], 0),
+        (file_map["subdir1"], file_map["file2"], 1),
+        (file_map["."], file_map["file2"], 2),
+        # file3
+        (file_map["file3"], file_map["file3"], 0),
+        (file_map["subdir1"], file_map["file3"], 1),
+        (file_map["."], file_map["file3"], 2),
+        # subdir2
+        (file_map["subdir2"], file_map["subdir2"], 0),
+        (file_map["."], file_map["subdir2"], 1),
+        # file4
+        (file_map["file4"], file_map["file4"], 0),
+        (file_map["subdir2"], file_map["file4"], 1),
+        (file_map["."], file_map["file4"], 2),
+        # subdir3
+        (file_map["subdir3"], file_map["subdir3"], 0),
+        (file_map["subdir2"], file_map["subdir3"], 1),
+        (file_map["."], file_map["subdir3"], 2),
+        # file5
+        (file_map["file5"], file_map["file5"], 1),
+        (file_map["subdir3"], file_map["file5"], 2),
+        (file_map["subdir2"], file_map["file5"], 3),
+        (file_map["."], file_map["file5"], 4),
     )
 
+    relations = database.relations.all()
+    assert len(relations) == len(expected_relations)
     for i, relation in enumerate(relations):
         expected_relation = ifsql.database.Relation(
             ancestor_id=expected_relations[i][0],
