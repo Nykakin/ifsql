@@ -16,3 +16,9 @@ def parser():
     import ifsql.parser
 
     return ifsql.parser.Parser()
+
+
+@pytest.fixture
+def cmd():
+    import ifsql.cmd
+    return ifsql.cmd.Cmd()

@@ -55,7 +55,7 @@ class File(Base):
 
 
 class Relation(Base):
-    __tablename__ = "paths"
+    __tablename__ = "relations"
 
     ancestor_id = sqlalchemy.Column(
         sqlalchemy.Integer(), sqlalchemy.ForeignKey("files.file_id"), primary_key=True
@@ -125,12 +125,20 @@ class Database:
                 self._session.flush()
         return f
 
-    def query(self, query): 
-# SELECT k.*
-# FROM Komentarze AS k
-# JOIN SciezkiDrzewa AS s ON k.id_komentarza = s.potomek
-# WHERE s.przodek = 4;
-        pass
+    def query(self, query, path_id_cache):
+        """
+            SELECT f.*
+            FROM files AS f
+            JOIN relations AS r ON f.file_id = r.descendant_id
+            WHERE r.ancestor_id = 4;
+        """
+        path_id = path_id_cache[query.froms[0].name]
+        query._from_obj.clear()
+
+        join = sqlalchemy.orm.join(File, Relation, File.file_id == Relation.descendant_id)
+        query = query.select_from(join).where(Relation.ancestor_id == 1)
+
+        return self._session.execute(query)
 
     @property
     def files(self):

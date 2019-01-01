@@ -9,3 +9,11 @@ class Cmd:
         self._path_id_cache = {}
 
         analyse.walk(root, self._database, self._path_id_cache)
+
+    def query(self, input_query):
+        s = self._parser.parse(input_query)
+        path = s.froms[0].name
+        s._from_obj.clear()
+        s = s.select_from(table("another_table"))
+
+        print(s)
