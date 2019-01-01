@@ -37,17 +37,19 @@ def analyse_file(path, name):
 
 
 def walk(root, database, path_id_cache):
-    parent_node = None
-    for root, _, files in os.walk(root):
-        if parent_node is None:
-            data = analyse_file(root, ".")
-            parent_node = database.insert_file(data, None)
-            path_id_cache["."] = parent_node.file_id
-        else:
-            data = analyse_file(os.path.dirname(root), os.path.basename(root))
-            parent_node = database.insert_file(data, parent_node)
-            path_id_cache[root] = parent_node.file_id
+    data = analyse_file(root, ".")
+    parent_id = database.insert_file(data, None)
+    path_id_cache["."] = parent_id
+
+    for path, directories, files in os.walk(root):
+        parent_id = path_id_cache[os.path.relpath(path, root)]
 
         for name in files:
-            data = analyse_file(root, name)
-            database.insert_file(data, parent_node)
+            data = analyse_file(path, name)
+            database.insert_file(data, parent_id)
+    
+        for name in directories:
+            data = analyse_file(path, name)
+            directory_id = database.insert_file(data, parent_id)
+
+            path_id_cache[os.path.relpath(os.path.join(path, name), root)] = directory_id

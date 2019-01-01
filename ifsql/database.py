@@ -103,7 +103,7 @@ class Database:
         Session = sqlalchemy.orm.sessionmaker(bind=engine)
         self._session = Session()
 
-    def insert_file(self, data, parent):
+    def insert_file(self, data, parent_id):
         f = File(**data)
         self._session.add(f)
         self._session.flush()
@@ -112,9 +112,9 @@ class Database:
         self._session.add(p)
         self._session.flush()
 
-        if parent is not None:
+        if parent_id is not None:
             for rel in self._session.query(Relation).filter(
-                Relation.descendant_id == parent.file_id
+                Relation.descendant_id == parent_id
             ):
                 r = Relation(
                     ancestor_id=rel.ancestor_id,
@@ -123,7 +123,8 @@ class Database:
                 )
                 self._session.add(r)
                 self._session.flush()
-        return f
+
+        return f.file_id
 
     def query(self, query, path_id_cache):
         """
@@ -134,10 +135,8 @@ class Database:
         """
         path_id = path_id_cache[query.froms[0].name]
         query._from_obj.clear()
-
         join = sqlalchemy.orm.join(File, Relation, File.file_id == Relation.descendant_id)
-        query = query.select_from(join).where(Relation.ancestor_id == 1)
-
+        query = query.select_from(join).where(Relation.ancestor_id == path_id)
         return self._session.execute(query)
 
     @property

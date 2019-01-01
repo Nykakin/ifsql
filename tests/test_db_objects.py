@@ -71,15 +71,19 @@ def test_relations(fs, database):
     ifsql.analyse.walk(fs.root, database, path_id_cache)
 
     file_map = {f.file_name: f.file_id for f in database.files.all()}
+
     expected_relations = (
         # .
         (file_map["."], file_map["."], 0),
         # file1
-        (file_map["file1"], file_map["file1"], 1),
+        (file_map["file1"], file_map["file1"], 0),
         (file_map["."], file_map["file1"], 1),
         # subdir1
         (file_map["subdir1"], file_map["subdir1"], 0),
         (file_map["."], file_map["subdir1"], 1),
+        # subdir2
+        (file_map["subdir2"], file_map["subdir2"], 0),
+        (file_map["."], file_map["subdir2"], 1),
         # file2
         (file_map["file2"], file_map["file2"], 0),
         (file_map["subdir1"], file_map["file2"], 1),
@@ -88,9 +92,6 @@ def test_relations(fs, database):
         (file_map["file3"], file_map["file3"], 0),
         (file_map["subdir1"], file_map["file3"], 1),
         (file_map["."], file_map["file3"], 2),
-        # subdir2
-        (file_map["subdir2"], file_map["subdir2"], 0),
-        (file_map["."], file_map["subdir2"], 1),
         # file4
         (file_map["file4"], file_map["file4"], 0),
         (file_map["subdir2"], file_map["file4"], 1),
@@ -100,10 +101,10 @@ def test_relations(fs, database):
         (file_map["subdir2"], file_map["subdir3"], 1),
         (file_map["."], file_map["subdir3"], 2),
         # file5
-        (file_map["file5"], file_map["file5"], 1),
-        (file_map["subdir3"], file_map["file5"], 2),
-        (file_map["subdir2"], file_map["file5"], 3),
-        (file_map["."], file_map["file5"], 4),
+        (file_map["file5"], file_map["file5"], 0),
+        (file_map["subdir3"], file_map["file5"], 1),
+        (file_map["subdir2"], file_map["file5"], 2),
+        (file_map["."], file_map["file5"], 3),
     )
 
     relations = database.relations.all()
