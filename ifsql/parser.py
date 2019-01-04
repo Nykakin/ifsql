@@ -56,14 +56,15 @@ GRAMMAR = "".join(
                 | expr binary_operator expr
                 | "(" expr ")"
                 | /cast/i "(" expr /as/i type_name ")"
-                | function_name "(" [ [ /distinct/i ] expr ( "," expr )* | "*" ] ")"
+                | function_name "(" [ [ /distinct/i ] expr expr_comma | "*" ] ")"
                 | expr [ /not/i ] ( /like/i | /glob/i | /regexp/i | /match/i ) expr [ /escape/i expr ]
                 | expr ( /isnull/i | /notnull/i | /not null/i )
                 | expr /is/i [ /not/i ] expr
-                | expr [ /not/i ] /in/i "(" expr ( "," expr )* ")"
+                | expr [ /not/i ] /in/i "(" expr_comma ")"
                 | expr [ /not/i ] /between/i expr /and/i expr
                 | /case/i [ expr ] (/when/i expr /then/i expr)* [ /else/i expr ] /end/i
     
+            !expr_comma: expr ( "," expr )*
 
             column_name: /[a-z_]+/
             function_name: /[a-z]+/
@@ -143,6 +144,9 @@ GRAMMAR = "".join(
 class TreeToSqlAlchemy(lark.Transformer):
     def expr(self, args):
         return " ".join(args)
+
+    def expr_comma(self, args):
+        return ", ".join(args)
 
     def to_str(self, args):
         return str(args[0])
