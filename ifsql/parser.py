@@ -44,7 +44,7 @@ GRAMMAR = "".join(
         #
         # TODO: support select statements (https://www.sqlite.org/docsrc/doc/trunk/art/syntax/all-bnf.html#select-stmt)
         #   in order to allow subquerying?
-        # TODO: full cast support (https://www.sqlite.org/docsrc/doc/trunk/art/syntax/all-bnf.html#type-name)?
+        # TODO: support type casitng?
         # TODO: support collations
         """
             !expr: literal_value
@@ -53,7 +53,6 @@ GRAMMAR = "".join(
                 | expr binary_operator expr
                 | expr binary_operator expr
                 | "(" expr ")"
-                | /cast/i "(" expr /as/i type_name ")"
                 | function_name "(" [ [ /distinct/i ] expr expr_comma | "*" ] ")"
                 | expr [ /not/i ] ( /like/i | /glob/i | /regexp/i | /match/i ) expr [ /escape/i expr ]
                 | expr ( /isnull/i | /notnull/i | /not null/i )
@@ -100,7 +99,6 @@ GRAMMAR = "".join(
                 | /regexp/i
                 | /and/i
                 | /or/i
-            type_name: /none/i | /text/i | /real/i | /integer/i | /numeric/i | /int/i
     
             raise_function: /raise/i ( [ /ignore/i | [ /rollback/i | /abort/i | /fail/i ]~1 "," error_message ]~1 )
             error_message: /[a-zA-Z0-9]+/
@@ -154,7 +152,6 @@ class TreeToSqlAlchemy(lark.Transformer):
     number = to_str
     binary_operator = to_str
     unary_operator = to_str
-    type_name = to_str
     column_name = to_str
     table_name = to_str
     function_name = to_str
@@ -201,7 +198,12 @@ class TreeToSqlAlchemy(lark.Transformer):
         return list(args)
 
     def result_column(self, args):
-        return sqlalchemy.sql.literal_column(' '.join(args))
+        column = sqlalchemy.sql.literal_column(str(args[0]))
+        if len(args) > 1:
+            column = column.label(args[2].strip("'\"'"))
+
+        return column
+
 
     def select_core_where(self, args):
         where = None

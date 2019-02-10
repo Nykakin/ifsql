@@ -249,25 +249,6 @@ def test_expression(fs, database, parser):
     assert result[0][0] == 990
 
 
-def test_cast(fs, database, parser):
-    import ifsql.database
-    import ifsql.analyse
-
-    path_id_cache = {}
-
-    fs.add_file(path="file1", size=100)
-
-    ifsql.analyse.walk(fs.root, database, path_id_cache)
-
-    query = parser.parse(
-        "SELECT CAST(file_size AS text) FROM . WHERE file_name = 'file1'"
-    )
-    result = list(database.query(query, path_id_cache))
-
-    assert len(result) == 1
-    assert result[0][0] == "100"
-
-
 def test_select_distinct(fs, database, parser):
     import ifsql.database
     import ifsql.analyse
@@ -325,7 +306,7 @@ def test_select_alias(fs, database, parser):
     result = list(database.query(query, path_id_cache))
 
     assert len(result) == 1
-    assert result[0][0] == "file1"
+    assert result[0].file_name_alias == "file1"
 
 
 def test_select_where_expr(fs, database, parser):

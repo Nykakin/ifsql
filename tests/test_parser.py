@@ -16,7 +16,6 @@ import pytest
         "select file_name, file_size from .",
         "select file_name as fn from .",
         "select file_name as fn, file_size as fs from .",
-        "SELECT CAST(b AS INT) + 2 AS alias from .",
         "select file_size+12 from .",
 
         "select distinct * from .",
