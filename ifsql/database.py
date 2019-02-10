@@ -7,9 +7,25 @@ import sqlalchemy.orm
 Base = sqlalchemy.ext.declarative.declarative_base()
 
 
+def fields():
+    return list(File._field_names) + ['depth']
+
+
 class File(Base):
     __tablename__ = "files"
     __table_args__ = {"sqlite_autoincrement": True}
+
+    _field_names = (
+        "file_id",
+        "file_name",
+        "file_path",
+        "file_type",
+        "file_size",
+        "access_time",
+        "modification_time",
+        "group_id",
+        "owner_id",
+    )
 
     file_id = sqlalchemy.Column(sqlalchemy.Integer(), primary_key=True)
     file_name = sqlalchemy.Column(sqlalchemy.String())
@@ -29,20 +45,11 @@ class File(Base):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    
+
     @property
     def _fields(self):
-        fields = (
-            "file_id",
-            "file_name",
-            "file_path",
-            "file_type",
-            "file_size",
-            "access_time",
-            "modification_time",
-            "group_id",
-            "owner_id",
-        )
-        return {f: getattr(self, f) for f in fields}
+        return {f: getattr(self, f) for f in File._field_names}
 
     def __str__(self):
         return self.file_name
@@ -128,12 +135,6 @@ class Database:
         return f.file_id
 
     def query(self, query, path_id_cache):
-        """
-            SELECT f.*
-            FROM files AS f
-            JOIN relations AS r ON f.file_id = r.descendant_id
-            WHERE r.ancestor_id = 4;
-        """
         path_id = path_id_cache[query.froms[0].name.rstrip()]
         query._from_obj.clear()
         join = sqlalchemy.orm.join(

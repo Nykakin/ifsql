@@ -61,21 +61,11 @@ def setup_logging(loglevel):
     )
 
 
-def main(args):
-    """
-    Main entry point
-    """
-    args = parse_args(args)
-    setup_logging(args.loglevel)
-
-
 def run():
     """
     Entry point for console_scripts
     """
-    main(sys.argv[1:])
-    c = cmd.Cmd()
-
-
-if __name__ == "__main__":
-    run()
+    args = parse_args(sys.argv[1:])
+    setup_logging(args.loglevel)
+    c = cmd.Cmd("/tmp/TEST")
+    c.run()
