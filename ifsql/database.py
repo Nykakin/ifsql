@@ -133,7 +133,7 @@ class Database:
             JOIN relations AS r ON f.file_id = r.descendant_id
             WHERE r.ancestor_id = 4;
         """
-        path_id = path_id_cache[query.froms[0].name]
+        path_id = path_id_cache[query.froms[0].name.rstrip()]
         query._from_obj.clear()
         join = sqlalchemy.orm.join(File, Relation, File.file_id == Relation.descendant_id)
         query = query.select_from(join).where(Relation.ancestor_id == path_id)

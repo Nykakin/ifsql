@@ -32,9 +32,7 @@ GRAMMAR = "".join(
         # passing table-name is not supported, since we have only one table with file data to work with
         # aliasing with as is not supported for very same reason
         """
-            !result_column: "*" | expr [ /as/i column_alias ]
-
-            column_alias: string
+            !result_column: "*" | expr [ /as/i string ]
         """,
         # table name in select from can be either a string (which is a path like "./path/to/my/dir"
         # or a dot ., which is translated to local directory
@@ -203,7 +201,7 @@ class TreeToSqlAlchemy(lark.Transformer):
         return list(args)
 
     def result_column(self, args):
-        return sqlalchemy.sql.literal_column(str(args[0]))
+        return sqlalchemy.sql.literal_column(' '.join(args))
 
     def select_core_where(self, args):
         where = None
