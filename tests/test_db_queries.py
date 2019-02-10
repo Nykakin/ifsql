@@ -1,5 +1,4 @@
-import os
-import tempfile
+import operator
 
 import pytest
 
@@ -230,6 +229,36 @@ def test_select_one_file_from_subdir(fs, database, parser):
     assert len(result) == 1
     expected = ["file2"]
     assert sorted(r.file_name for r in result) == expected
+
+
+def test_select_depth(fs, database, parser):
+    import ifsql.database
+    import ifsql.analyse
+
+    path_id_cache = {}
+
+    fs.add_directory("level_1")
+    fs.add_directory("level_1/level_2")
+    fs.add_directory("level_1/level_2/level_3")
+    fs.add_file(path="level_0_file", size=10)
+    fs.add_file(path="level_1/level_1_file", size=10)
+    fs.add_file(path="level_1/level_2/level_2_file", size=10)
+    fs.add_file(path="level_1/level_2/level_3/level_3_file", size=10)
+
+    ifsql.analyse.walk(fs.root, database, path_id_cache)
+
+    query = parser.parse("SELECT file_name, depth FROM . WHERE file_type = 'F'")
+    result = list(database.query(query, path_id_cache))
+
+    assert len(result) == 4
+    expected = [
+        ("level_0_file", 1),
+        ("level_1_file", 2),
+        ("level_2_file", 3),
+        ("level_3_file", 4),
+    ]
+    sorted_result = sorted(result, key=operator.attrgetter("file_name"))
+    assert [(r.file_name, r.depth) for r in sorted_result] == expected
 
 
 def test_expression(fs, database, parser):

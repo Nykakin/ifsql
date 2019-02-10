@@ -6,6 +6,7 @@ import sqlalchemy.orm
 
 Base = sqlalchemy.ext.declarative.declarative_base()
 
+
 class File(Base):
     __tablename__ = "files"
     __table_args__ = {"sqlite_autoincrement": True}
@@ -63,7 +64,7 @@ class Relation(Base):
     descendant_id = sqlalchemy.Column(
         sqlalchemy.Integer(), sqlalchemy.ForeignKey("files.file_id"), primary_key=True
     )
-    path_length = sqlalchemy.Column(sqlalchemy.Integer())
+    depth = sqlalchemy.Column(sqlalchemy.Integer())
 
     ancestor = sqlalchemy.orm.relationship(
         "File", uselist=False, foreign_keys=[ancestor_id]
@@ -82,7 +83,7 @@ class Relation(Base):
 
     @property
     def _fields(self):
-        fields = ("ancestor_id", "descendant_id", "path_length")
+        fields = ("ancestor_id", "descendant_id", "depth")
         return {f: getattr(self, f) for f in fields}
 
     def __str__(self):
@@ -108,7 +109,7 @@ class Database:
         self._session.add(f)
         self._session.flush()
 
-        p = Relation(ancestor_id=f.file_id, descendant_id=f.file_id, path_length=0)
+        p = Relation(ancestor_id=f.file_id, descendant_id=f.file_id, depth=0)
         self._session.add(p)
         self._session.flush()
 
@@ -119,7 +120,7 @@ class Database:
                 r = Relation(
                     ancestor_id=rel.ancestor_id,
                     descendant_id=f.file_id,
-                    path_length=rel.path_length + 1,
+                    depth=rel.depth + 1,
                 )
                 self._session.add(r)
                 self._session.flush()
@@ -135,7 +136,9 @@ class Database:
         """
         path_id = path_id_cache[query.froms[0].name.rstrip()]
         query._from_obj.clear()
-        join = sqlalchemy.orm.join(File, Relation, File.file_id == Relation.descendant_id)
+        join = sqlalchemy.orm.join(
+            File, Relation, File.file_id == Relation.descendant_id
+        )
         query = query.select_from(join).where(Relation.ancestor_id == path_id)
         return self._session.execute(query)
 

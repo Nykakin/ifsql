@@ -24,6 +24,7 @@ def parser():
 @pytest.fixture
 def cmd():
     import ifsql.cmd
+
     return ifsql.cmd.Cmd()
 
 
@@ -42,6 +43,6 @@ class MockFilesystem:
 
     def add_file(self, path, size):
         full_path = os.path.join(self.root, path)
-    
+
         with open(full_path, "wb") as f:
             f.write((0).to_bytes(size, "big"))

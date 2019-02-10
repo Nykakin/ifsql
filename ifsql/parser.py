@@ -204,7 +204,6 @@ class TreeToSqlAlchemy(lark.Transformer):
 
         return column
 
-
     def select_core_where(self, args):
         where = None
         if len(args) > 0:
