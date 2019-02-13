@@ -13,7 +13,6 @@ def fields():
 
 class File(Base):
     __tablename__ = "files"
-    __table_args__ = {"sqlite_autoincrement": True}
 
     _field_names = (
         "file_id",
@@ -111,33 +110,48 @@ class Database:
     def __init__(self):
         engine = sqlalchemy.create_engine("sqlite:///:memory:")
         Base.metadata.create_all(engine)
-        Session = sqlalchemy.orm.sessionmaker(bind=engine)
-        self._session = Session()
+        self.SessionMaker = sqlalchemy.orm.sessionmaker(engine)
+        self.file_count = 0
+        self.connection = engine.connect()
+
+    def begin(self):
+        self.insert_transaction = self.connection.begin()
+
+    def commit(self):
+        self.insert_transaction.commit()
+
+    def create_session(self):
+        self._session = self.SessionMaker()
 
     def insert_file(self, data, parent_id):
-        f = File(**data)
-        self._session.add(f)
-        self._session.flush()
+        self.file_count += 1
+        data["file_id"] = self.file_count
+        self.connection.execute(File.__table__.insert(), [data])
 
-        p = Relation(ancestor_id=f.file_id, descendant_id=f.file_id, depth=0)
-        self._session.add(p)
-        self._session.flush()
+        relation_data = {
+            "ancestor_id": self.file_count,
+            "descendant_id": self.file_count,
+            "depth": 0,
+        }
+        self.connection.execute(Relation.__table__.insert(), relation_data)
 
         if parent_id is not None:
-            for rel in self._session.query(Relation).filter(
+            select = Relation.__table__.select().where(
                 Relation.descendant_id == parent_id
-            ):
-                r = Relation(
-                    ancestor_id=rel.ancestor_id,
-                    descendant_id=f.file_id,
-                    depth=rel.depth + 1,
-                )
-                self._session.add(r)
-                self._session.flush()
+            )
+            result = self.connection.execute(select)
+            for rel in result:
+                relation_data = {
+                    "ancestor_id": rel.ancestor_id,
+                    "descendant_id": self.file_count,
+                    "depth": rel.depth + 1,
+                }
+                self.connection.execute(Relation.__table__.insert(), relation_data)
 
-        return f.file_id
+        return self.file_count
 
     def query(self, query, path_id_cache):
+        # replace from clause into a join with relationship table
         path_id = path_id_cache.get(query.froms[0].name.rstrip())
         if path_id is None:
             raise DatabaseException("Unknown FROM path")

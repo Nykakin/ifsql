@@ -38,6 +38,8 @@ def analyse_file(root, path, name):
 
 
 def walk(root, database, path_id_cache):
+    database.begin()
+
     data = analyse_file(root, root, ".")
     parent_id = database.insert_file(data, None)
     path_id_cache["."] = parent_id
@@ -56,3 +58,6 @@ def walk(root, database, path_id_cache):
             path_id_cache[
                 os.path.relpath(os.path.join(path, name), root)
             ] = directory_id
+
+    database.commit()
+    database.create_session()

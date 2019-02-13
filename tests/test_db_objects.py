@@ -38,7 +38,7 @@ def test_files(filesystem, database):
 
         assert files[i].owner_id == os.getuid()
         assert files[i].group_id == os.getgid()
-        assert files[i].file_path == file_path
+        assert files[i].file_absolute_path == file_path
         assert files[i].file_name == file_name
         assert datetime.datetime.now() - files[i].access_time < datetime.timedelta(
             seconds=1
@@ -113,6 +113,6 @@ def test_relations(fs, database):
         expected_relation = ifsql.database.Relation(
             ancestor_id=expected_relations[i][0],
             descendant_id=expected_relations[i][1],
-            path_length=expected_relations[i][2],
+            depth=expected_relations[i][2],
         )
         assert expected_relation == relation

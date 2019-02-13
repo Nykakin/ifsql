@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import os
 import sys
 import logging
 
@@ -26,6 +27,9 @@ def parse_args(args):
     """
     parser = argparse.ArgumentParser(
         description="Analyzing directory structure with sql calls"
+    )
+    parser.add_argument(
+        "directory", nargs="?", default=os.getcwd(), help="directory to analyse"
     )
     parser.add_argument(
         "--version", action="version", version="ifsql {ver}".format(ver=__version__)
@@ -67,5 +71,5 @@ def run():
     """
     args = parse_args(sys.argv[1:])
     setup_logging(args.loglevel)
-    c = cmd.Cmd("/tmp/TEST")
+    c = cmd.Cmd(args.directory)
     c.run()
