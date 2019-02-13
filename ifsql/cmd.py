@@ -14,6 +14,8 @@ from prompt_toolkit.styles import merge_styles
 from prompt_toolkit.completion import WordCompleter, merge_completers
 from prompt_toolkit.styles import Style as PromptToolkitStyle
 
+import tabulate
+
 ColumnToken = Token.ColumnToken
 PathToken = Token.PathToken
 
@@ -122,12 +124,9 @@ class Cmd:
             except EOFError:
                 break  # Control-D pressed.
 
-            print(text)
-
-    def query(self, input_query):
-        s = self._parser.parse(input_query)
-        path = s.froms[0].name
-        s._from_obj.clear()
-        s = s.select_from(table("another_table"))
-
-        print(s)
+            try:
+                query = self._parser.parse(text)
+                result = self._database.query(query, self._path_id_cache)
+                print(tabulate.tabulate(result, headers=result.keys()))
+            except (database.DatabaseException, parser.ParserException) as e:
+                print(e)

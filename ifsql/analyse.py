@@ -21,12 +21,13 @@ def file_type(mode):
         return "S"
 
 
-def analyse_file(path, name):
+def analyse_file(root, path, name):
     result = os.stat(os.path.join(path, name))
 
     return {
         "file_name": name,
-        "file_path": path,
+        "file_path": os.path.relpath(os.path.join(path, name), root),
+        "file_absolute_path": path,
         "file_type": file_type(result.st_mode),
         "file_size": result.st_size,
         "access_time": datetime.datetime.fromtimestamp(result.st_atime),
@@ -37,7 +38,7 @@ def analyse_file(path, name):
 
 
 def walk(root, database, path_id_cache):
-    data = analyse_file(root, ".")
+    data = analyse_file(root, root, ".")
     parent_id = database.insert_file(data, None)
     path_id_cache["."] = parent_id
 
@@ -45,11 +46,11 @@ def walk(root, database, path_id_cache):
         parent_id = path_id_cache[os.path.relpath(path, root)]
 
         for name in files:
-            data = analyse_file(path, name)
+            data = analyse_file(root, path, name)
             database.insert_file(data, parent_id)
 
         for name in directories:
-            data = analyse_file(path, name)
+            data = analyse_file(root, path, name)
             directory_id = database.insert_file(data, parent_id)
 
             path_id_cache[

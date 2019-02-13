@@ -8,7 +8,7 @@ Base = sqlalchemy.ext.declarative.declarative_base()
 
 
 def fields():
-    return list(File._field_names) + ['depth']
+    return list(File._field_names) + ["depth"]
 
 
 class File(Base):
@@ -30,6 +30,7 @@ class File(Base):
     file_id = sqlalchemy.Column(sqlalchemy.Integer(), primary_key=True)
     file_name = sqlalchemy.Column(sqlalchemy.String())
     file_path = sqlalchemy.Column(sqlalchemy.String())
+    file_absolute_path = sqlalchemy.Column(sqlalchemy.String())
     file_type = sqlalchemy.Column(sqlalchemy.String(1))
     file_size = sqlalchemy.Column(sqlalchemy.Integer())
     access_time = sqlalchemy.Column(sqlalchemy.DateTime())
@@ -44,8 +45,6 @@ class File(Base):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-
-    
 
     @property
     def _fields(self):
@@ -104,6 +103,10 @@ class Relation(Base):
         return "Relation({})".format(", ".join(args))
 
 
+class DatabaseException(Exception):
+    pass
+
+
 class Database:
     def __init__(self):
         engine = sqlalchemy.create_engine("sqlite:///:memory:")
@@ -135,13 +138,21 @@ class Database:
         return f.file_id
 
     def query(self, query, path_id_cache):
-        path_id = path_id_cache[query.froms[0].name.rstrip()]
+        path_id = path_id_cache.get(query.froms[0].name.rstrip())
+        if path_id is None:
+            raise DatabaseException("Unknown FROM path")
+
         query._from_obj.clear()
         join = sqlalchemy.orm.join(
             File, Relation, File.file_id == Relation.descendant_id
         )
         query = query.select_from(join).where(Relation.ancestor_id == path_id)
-        return self._session.execute(query)
+
+        # ignore ancestor_id and descendant_id in result
+        query = query.with_only_columns([File, Relation.depth])
+
+        result = self._session.execute(query)
+        return result
 
     @property
     def files(self):
