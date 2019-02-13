@@ -15,7 +15,6 @@ class File(Base):
     __tablename__ = "files"
 
     _field_names = (
-        "file_id",
         "file_name",
         "dirname",
         "full_path",
@@ -23,6 +22,7 @@ class File(Base):
         "file_size",
         "access_time",
         "modification_time",
+        "creation_time",
         "group_id",
         "owner_id",
     )
@@ -184,7 +184,8 @@ class Database:
         )
         for c in query._raw_columns:
             if str(c).strip() == "*":
-                cols.extend(fields)
+                cols.extend(sqlalchemy.sql.text(f) for f in File._field_names)
+                cols.append(Relation.depth)
             else:
                 cols.append(c)
         query = query.with_only_columns(cols)
