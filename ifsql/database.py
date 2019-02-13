@@ -63,11 +63,12 @@ class File(Base):
 class Relation(Base):
     __tablename__ = "relations"
 
+    relation_id = sqlalchemy.Column(sqlalchemy.Integer(), primary_key=True)
     ancestor_id = sqlalchemy.Column(
-        sqlalchemy.Integer(), sqlalchemy.ForeignKey("files.file_id"), primary_key=True
+        sqlalchemy.Integer(), sqlalchemy.ForeignKey("files.file_id"), index=True
     )
     descendant_id = sqlalchemy.Column(
-        sqlalchemy.Integer(), sqlalchemy.ForeignKey("files.file_id"), primary_key=True
+        sqlalchemy.Integer(), sqlalchemy.ForeignKey("files.file_id"), index=True
     )
     depth = sqlalchemy.Column(sqlalchemy.Integer())
 
@@ -140,13 +141,16 @@ class Database:
                 Relation.descendant_id == parent_id
             )
             result = self.connection.execute(select)
+            relation_data = []
             for rel in result:
-                relation_data = {
-                    "ancestor_id": rel.ancestor_id,
-                    "descendant_id": self.file_count,
-                    "depth": rel.depth + 1,
-                }
-                self.connection.execute(Relation.__table__.insert(), relation_data)
+                relation_data.append(
+                    {
+                        "ancestor_id": rel.ancestor_id,
+                        "descendant_id": self.file_count,
+                        "depth": rel.depth + 1,
+                    }
+                )
+            self.connection.execute(Relation.__table__.insert(), relation_data)
 
         return self.file_count
 
