@@ -22,12 +22,12 @@ def file_type(mode):
 
 
 def analyse_file(root, path, name):
-    result = os.stat(os.path.join(path, name))
+    result = os.stat(os.path.join(path, name), follow_symlinks=False)
 
     return {
         "file_name": name,
-        "file_path": os.path.relpath(os.path.join(path, name), root),
-        "file_absolute_path": path,
+        "dirname": os.path.join(".", os.path.dirname(os.path.relpath(os.path.join(path, name), root))),
+        "full_path": os.path.join(path, name),
         "file_type": file_type(result.st_mode),
         "file_size": result.st_size,
         "access_time": datetime.datetime.fromtimestamp(result.st_atime),

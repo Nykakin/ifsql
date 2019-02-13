@@ -28,8 +28,8 @@ class File(Base):
 
     file_id = sqlalchemy.Column(sqlalchemy.Integer(), primary_key=True)
     file_name = sqlalchemy.Column(sqlalchemy.String())
-    file_path = sqlalchemy.Column(sqlalchemy.String())
-    file_absolute_path = sqlalchemy.Column(sqlalchemy.String())
+    dirname = sqlalchemy.Column(sqlalchemy.String())
+    full_path = sqlalchemy.Column(sqlalchemy.String())
     file_type = sqlalchemy.Column(sqlalchemy.String(1))
     file_size = sqlalchemy.Column(sqlalchemy.Integer())
     access_time = sqlalchemy.Column(sqlalchemy.DateTime())
@@ -168,9 +168,21 @@ class Database:
 
         # ignore ancestor_id and descendant_id in result if "select *" was used
         cols = []
+        fields = (
+            File.file_name,
+            File.dirname,
+            File.full_path,
+            File.file_type,
+            File.file_size,
+            File.access_time,
+            File.modification_time,
+            File.group_id,
+            File.owner_id,
+            Relation.depth,
+        )
         for c in query._raw_columns:
             if str(c).strip() == "*":
-                cols.extend([File, Relation.depth])
+                cols.extend(fields)
             else:
                 cols.append(c)
         query = query.with_only_columns(cols)

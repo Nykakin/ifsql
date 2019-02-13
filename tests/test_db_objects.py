@@ -15,45 +15,6 @@ def filesystem():
     return tmp_dir
 
 
-def test_files(filesystem, database):
-    import datetime
-    import os
-    import os.path
-    import ifsql.database
-    import ifsql.analyse
-
-    path_id_cache = {}
-    ifsql.analyse.walk(filesystem, database, path_id_cache)
-    files = database.files.all()
-
-    paths = (
-        (filesystem, "."),
-        (filesystem, "subdir1"),
-        (os.path.join(filesystem, "subdir1"), "subdir2"),
-        (os.path.join(filesystem, "subdir1/subdir2"), "test_file"),
-    )
-
-    for i, (file_path, file_name) in enumerate(paths):
-        path = os.path.join(file_path, file_name)
-
-        assert files[i].owner_id == os.getuid()
-        assert files[i].group_id == os.getgid()
-        assert files[i].file_absolute_path == file_path
-        assert files[i].file_name == file_name
-        assert datetime.datetime.now() - files[i].access_time < datetime.timedelta(
-            seconds=1
-        )
-        assert datetime.datetime.now() - files[
-            i
-        ].modification_time < datetime.timedelta(seconds=1)
-
-        if os.path.isfile(path):
-            assert files[i].file_size == 8196
-            assert files[i].file_type == "F"
-        else:
-            assert files[i].file_type == "D"
-
-
 def test_relations(fs, database):
     import ifsql.database
     import ifsql.analyse
