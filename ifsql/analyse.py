@@ -32,6 +32,7 @@ def analyse_file(root, path, name):
         "file_size": result.st_size,
         "access_time": datetime.datetime.fromtimestamp(result.st_atime),
         "modification_time": datetime.datetime.fromtimestamp(result.st_mtime),
+        "creation_time": datetime.datetime.fromtimestamp(result.st_ctime),
         "owner_id": result.st_uid,
         "group_id": result.st_gid,
     }

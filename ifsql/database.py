@@ -34,6 +34,7 @@ class File(Base):
     file_type = sqlalchemy.Column(sqlalchemy.String(1))
     file_size = sqlalchemy.Column(sqlalchemy.Integer())
     access_time = sqlalchemy.Column(sqlalchemy.DateTime())
+    creation_time = sqlalchemy.Column(sqlalchemy.DateTime())
     modification_time = sqlalchemy.Column(sqlalchemy.DateTime())
     group_id = sqlalchemy.Column(sqlalchemy.Integer())
     owner_id = sqlalchemy.Column(sqlalchemy.Integer())
