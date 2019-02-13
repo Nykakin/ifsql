@@ -148,8 +148,14 @@ class Database:
         )
         query = query.select_from(join).where(Relation.ancestor_id == path_id)
 
-        # ignore ancestor_id and descendant_id in result
-        query = query.with_only_columns([File, Relation.depth])
+        # ignore ancestor_id and descendant_id in result if "select *" was used
+        cols = []
+        for c in query._raw_columns:
+            if str(c).strip() == "*":
+                cols.extend([File, Relation.depth])
+            else:
+                cols.append(c)
+        query = query.with_only_columns(cols)
 
         result = self._session.execute(query)
         return result
