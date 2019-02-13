@@ -17,7 +17,8 @@ class File(Base):
     _field_names = (
         "file_id",
         "file_name",
-        "file_path",
+        "dirname",
+        "full_path",
         "file_type",
         "file_size",
         "access_time",

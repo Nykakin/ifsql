@@ -16,6 +16,8 @@ from prompt_toolkit.styles import Style as PromptToolkitStyle
 
 import tabulate
 
+import sqlalchemy.exc
+
 ColumnToken = Token.ColumnToken
 PathToken = Token.PathToken
 
@@ -130,3 +132,5 @@ class Cmd:
                 print(tabulate.tabulate(result, headers=result.keys()))
             except (database.DatabaseException, parser.ParserException) as e:
                 print(e)
+            except sqlalchemy.exc.SQLAlchemyError as e:
+                print("database error")
