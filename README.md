@@ -30,7 +30,7 @@ There are following columns available to query:
 | column name | description|
 | ------------| -----------|
 |file_name |Name of file or directory found.|
-|dirname|Relative directory path. To obtain full relative path you can use SQLite concatenation syntaxt `SELECT dirname || file_name FROM .`
+|dirname|Relative directory path. To obtain full relative path you can use SQLite concatenation syntaxt ```SELECT dirname || file_name FROM .```
 |full_path|Absolute filesystem path.|
 |file_type|An one-letter file-type symbol. A table of possible values is described below.
 |file_size|File size in bytes.|
@@ -39,23 +39,45 @@ There are following columns available to query:
 |creation_time|Time of file creation.|
 |owner_id|Identificator of file owner.|
 |group_id|Identificator of file group owner.|
-|depth|Depth in the file tree. Current directory, `.` is the only one with the depth 0. All files and directories inside it have depth 1. Each subdirectory within the path increases depth by 1. In other words, to analyse only direct descendants of a current directory use `SELECT * FROM . WHERE depth = 1`
+|depth|Depth in the file tree. Current directory, `.` is the only one with the depth 0. All files and directories inside it have depth 1. Each subdirectory within the path increases depth by 1. In other words, to analyse only direct descendants of a current directory use ```SELECT * FROM . WHERE depth = 1```
 
 `file_type` column can have one of following values:
 
 | value | file_type |
 |-------|---------|
-|"D"|Directory|
-|"F"|File|
-|"B"|Block device|
-|"C"|Character device|
-|"N"|Named pipe|
-|"L"|Link|
-|"S"|Socket|
+|D|Directory|
+|F|File|
+|B|Block device|
+|C|Character device|
+|N|Named pipe|
+|L|Link|
+|S|Socket|
 
-For example, todetermine total size of all files recursively, you can use `SELECT SUM(*) FROM . WHERE file_type = 'F'`.
+For example, todetermine total size of all files recursively, you can use ```SELECT SUM(*) FROM . WHERE file_type = 'F'```.
 
-If instead of current directory `.` a subpath is used as a "table" to query from, the value of depth is decreased accordingly.
+If instead of current directory `.` a subpath is used as a "table" to query from, the value of depth is decreased accordingly:
+```
+(venv) mariusz /tmp/TEST $ tree
+.
+└── SUBDIR1
+    └── SUBDIR2
+        └── FILE
+
+2 directories, 1 file
+(venv) mariusz /tmp/TEST $ ifsql
+> SELECT file_name, depth FROM . WHERE file_name = 'FILE'
+file_name      depth
+-----------  -------
+FILE               3
+> SELECT file_name, depth FROM SUBDIR1 WHERE file_name = 'FILE'
+file_name      depth
+-----------  -------
+FILE               2
+> SELECT file_name, depth FROM SUBDIR1/SUBDIR2 WHERE file_name = 'FILE'
+file_name      depth
+-----------  -------
+FILE               1
+```
 
 
 
