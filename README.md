@@ -79,11 +79,14 @@ file_name      depth
 FILE               1
 ```
 
+In case of `database error`, you can use `?` symbol to retrieve more details:
 
-
-
-
-
+```
+> SELECT NONSENSE FROM .
+database error
+> ?
+(sqlite3.OperationalError) no such column: NONSENSE [SQL: 'SELECT NONSENSE \nFROM files JOIN relations ON files.file_id = relations.descendant_id \nWHERE relations.ancestor_id = ?'] [parameters: (1,)] (Background on this error at: http://sqlalche.me/e/e3q8)
+```
 
 # Tests
 
@@ -93,8 +96,18 @@ To run tests:
 python setup.py test
 ```
 
+# Acknowledgement 
 
-# Note
+This project was inspired by command line tool [`fsql`](https://github.com/kshvmdn/fsql) written in Go.
+
+Following libraries are used:
+* [lark-parser](https://github.com/lark-parser/lark)
+* [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit)
+* [pygments](http://pygments.org)
+* [pytest](https://docs.pytest.org/en/latest/)
+* [pytest-cov](https://pypi.org/project/pytest-cov/)
+* [sqlalchemy](https://www.sqlalchemy.org)
+* [tabulate](https://pypi.org/project/tabulate/)
 
 This project has been set up using PyScaffold 2.5.8. For details and usage
 information on PyScaffold see http://pyscaffold.readthedocs.org/.
