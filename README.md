@@ -88,7 +88,7 @@ database error
 (sqlite3.OperationalError) no such column: NONSENSE [SQL: 'SELECT NONSENSE \nFROM files JOIN relations ON files.file_id = relations.descendant_id \nWHERE relations.ancestor_id = ?'] [parameters: (1,)] (Background on this error at: http://sqlalche.me/e/e3q8)
 ```
 
-![Read here](docs/IMPLEMENTATION.md) to learn how does `ifsql` work internally.
+[Read here](docs/IMPLEMENTATION.md) to learn how does `ifsql` work internally.
 
 # Tests
 
