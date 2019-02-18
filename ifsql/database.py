@@ -126,17 +126,18 @@ class Database:
     def create_session(self):
         self._session = self.SessionMaker()
 
-    def insert_file(self, data, parent_id):
+    def insert_file(self, data, parent_id, is_directory=False):
         self.file_count += 1
         data["file_id"] = self.file_count
         self.connection.execute(File.__table__.insert(), [data])
 
-        relation_data = {
-            "ancestor_id": self.file_count,
-            "descendant_id": self.file_count,
-            "depth": 0,
-        }
-        self.connection.execute(Relation.__table__.insert(), relation_data)
+        if is_directory:
+            relation_data = {
+                "ancestor_id": self.file_count,
+                "descendant_id": self.file_count,
+                "depth": 0,
+            }
+            self.connection.execute(Relation.__table__.insert(), relation_data)
 
         if parent_id is not None:
             select = Relation.__table__.select().where(

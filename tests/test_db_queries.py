@@ -667,3 +667,19 @@ def test_select_sum_group_by_having(fs, database, parser):
 
     assert len(result) == 1
     assert result[0][1] == 30
+
+
+def _test_select_datetime_function(fs, database, parser):
+    import ifsql.database
+    import ifsql.analyse
+
+    path_id_cache = {}
+
+    fs.add_file(path="file1", size=100)
+
+    ifsql.analyse.walk(fs.root, database, path_id_cache)
+
+    query = "SELECT strftime('%m', creation_time) FROM . WHERE file_type = 'F'"
+    result = list(database.query(query, path_id_cache))
+
+    assert len(result) == 1

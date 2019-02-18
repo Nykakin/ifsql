@@ -42,7 +42,7 @@ def walk(root, database, path_id_cache):
     database.begin()
 
     data = analyse_file(root, root, ".")
-    parent_id = database.insert_file(data, None)
+    parent_id = database.insert_file(data, None, is_directory=True)
     path_id_cache["."] = parent_id
 
     for path, directories, files in os.walk(root):
@@ -54,7 +54,7 @@ def walk(root, database, path_id_cache):
 
         for name in directories:
             data = analyse_file(root, path, name)
-            directory_id = database.insert_file(data, parent_id)
+            directory_id = database.insert_file(data, parent_id, is_directory=True)
 
             path_id_cache[
                 os.path.relpath(os.path.join(path, name), root)
