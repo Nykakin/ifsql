@@ -1,3 +1,4 @@
+import datetime
 import operator
 
 import pytest
@@ -669,7 +670,7 @@ def test_select_sum_group_by_having(fs, database, parser):
     assert result[0][1] == 30
 
 
-def _test_select_datetime_function(fs, database, parser):
+def test_select_datetime_function(fs, database, parser):
     import ifsql.database
     import ifsql.analyse
 
@@ -679,7 +680,11 @@ def _test_select_datetime_function(fs, database, parser):
 
     ifsql.analyse.walk(fs.root, database, path_id_cache)
 
-    query = "SELECT strftime('%m', creation_time) FROM . WHERE file_type = 'F'"
+    query = parser.parse("""
+        SELECT strftime('%m', creation_time) as ctime 
+        FROM . WHERE file_name = 'file1'
+    """)
     result = list(database.query(query, path_id_cache))
 
     assert len(result) == 1
+    assert int(result[0].ctime) == datetime.datetime.now().month

@@ -53,7 +53,7 @@ GRAMMAR = "".join(
                 | expr binary_operator expr
                 | expr binary_operator expr
                 | "(" expr ")"
-                | function_name "(" [ [ /distinct/i ] expr expr_comma | "*" ] ")"
+                | function_name "(" [ [ /distinct/i ] expr_comma | "*" ] ")"
                 | expr [ /not/i ] ( /like/i | /glob/i | /regexp/i | /match/i ) expr [ /escape/i expr ]
                 | expr ( /isnull/i | /notnull/i | /not null/i )
                 | expr /is/i [ /not/i ] expr
@@ -64,8 +64,8 @@ GRAMMAR = "".join(
             !expr_comma: expr ( "," expr )*
 
             column_name: /[a-z_]+/
-            function_name: /[a-z]+/
-            collation_name: /a-z]+/
+            function_name: /[a-zA-Z]+/
+            collation_name: /[a-zA-Z]+/
 
             !unary_operator: "+" 
                 | "-"
