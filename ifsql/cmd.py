@@ -1,3 +1,5 @@
+import logging
+
 from ifsql import analyse
 from ifsql import database
 from ifsql import parser
@@ -20,6 +22,8 @@ import sqlalchemy.exc
 
 ColumnToken = Token.ColumnToken
 PathToken = Token.PathToken
+
+logger = logging.getLogger(__name__)
 
 
 class SQLSyntaxStyle(PygmentsStyle):
@@ -106,6 +110,7 @@ class Cmd:
         self._database = database.Database()
         self._parser = parser.Parser()
         self._path_id_cache = {}
+        self._last_error = ''
 
         self.prompt_session = PromptSession(
             lexer=PygmentsLexer(IfsqlLexer),
@@ -126,11 +131,16 @@ class Cmd:
             except EOFError:
                 break  # Control-D pressed.
 
-            try:
-                query = self._parser.parse(text)
-                result = self._database.query(query, self._path_id_cache)
-                print(tabulate.tabulate(result, headers=result.keys()))
-            except (database.DatabaseException, parser.ParserException) as e:
-                print(e)
-            except sqlalchemy.exc.SQLAlchemyError as e:
-                print("database error")
+            if text.strip() == '?':
+                print(self._last_error)
+            else:
+                try:
+                    query = self._parser.parse(text)
+                    result = self._database.query(query, self._path_id_cache)
+                    print(tabulate.tabulate(result, headers=result.keys()))
+                except (database.DatabaseException, parser.ParserException) as e:
+                    print(e)
+                except sqlalchemy.exc.SQLAlchemyError as e:
+                    self._last_error = e
+                    logger.info(e)
+                    print("database error")
