@@ -21,7 +21,7 @@ We obtain following model:
 
 Every arrow in this chart represents a single relation row. Besides the pair ancestor_id/descendant_id it also contain a depth value, which makes queries limited to a certain directoryy tree depth possible.
 
-Both tables and database utilities can be found in ![ifsql/database.py](../ifsql/database.py).
+Both tables and database utilities can be found in [ifsql/database.py](../ifsql/database.py).
 
 For more information about this technique can be found in a book *[SQL Antipatterns](https://pragprog.com/book/bksqla/sql-antipatterns)* by Bill Karwin.
 
@@ -36,10 +36,7 @@ JOIN relations AS r ON f.file_id = r.descendant_id
 WHERE r.ancestor_id = 4;
 ```
 
-To do so, a parser written using [lark-parser](https://github.com/lark-parser/lark) library is used. This parser can be found in [ifsql/parser.py](../ifsql/parser.py)
-
-
-
+To do so, a parser written using [lark-parser](https://github.com/lark-parser/lark) library is used. This parser can be found in [ifsql/parser.py](../ifsql/parser.py) based on [SQLite BNF grammar](https://www.sqlite.org/docsrc/doc/trunk/art/syntax/all-bnf.html). Parser constructs a `sqlalchemy.sql.select` object from a string query. This object is passed down to `Database` class using `query` methods which transforms it as described above.
 
 
 
