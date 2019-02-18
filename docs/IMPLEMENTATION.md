@@ -15,7 +15,7 @@ $ tree
 
 We obtain following model:
 
-![example](docs/example.png)
+![example](./example.png)
 
 Every arrow in this chart represents a single relation row. Besides the pair ancestor_id/descendant_id it also contain a depth value, which makes queries limited to a certain directoryy tree depth possible.
 
