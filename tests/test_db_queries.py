@@ -680,10 +680,12 @@ def test_select_datetime_function(fs, database, parser):
 
     ifsql.analyse.walk(fs.root, database, path_id_cache)
 
-    query = parser.parse("""
+    query = parser.parse(
+        """
         SELECT strftime('%m', creation_time) as ctime 
         FROM . WHERE file_name = 'file1'
-    """)
+    """
+    )
     result = list(database.query(query, path_id_cache))
 
     assert len(result) == 1
@@ -700,9 +702,11 @@ def test_select_collate(fs, database, parser):
 
     ifsql.analyse.walk(fs.root, database, path_id_cache)
 
-    query = parser.parse("""
+    query = parser.parse(
+        """
         SELECT file_name FROM . WHERE file_name = 'fIlE1' COLLATE NOCASE
-    """)
+    """
+    )
     result = list(database.query(query, path_id_cache))
 
     assert len(result) == 1

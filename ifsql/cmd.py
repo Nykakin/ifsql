@@ -110,7 +110,7 @@ class Cmd:
         self._database = database.Database()
         self._parser = parser.Parser()
         self._path_id_cache = {}
-        self._last_error = ''
+        self._last_error = ""
 
         self.prompt_session = PromptSession(
             lexer=PygmentsLexer(IfsqlLexer),
@@ -131,7 +131,7 @@ class Cmd:
             except EOFError:
                 break  # Control-D pressed.
 
-            if text.strip() == '?':
+            if text.strip() == "?":
                 print(self._last_error)
             else:
                 try:

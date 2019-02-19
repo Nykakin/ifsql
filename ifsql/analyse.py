@@ -26,7 +26,9 @@ def analyse_file(root, path, name):
 
     return {
         "file_name": name,
-        "dirname": os.path.join(".", os.path.dirname(os.path.relpath(os.path.join(path, name), root))),
+        "dirname": os.path.join(
+            ".", os.path.dirname(os.path.relpath(os.path.join(path, name), root))
+        ),
         "full_path": os.path.join(path, name),
         "file_type": file_type(result.st_mode),
         "file_size": result.st_size,

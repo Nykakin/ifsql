@@ -71,5 +71,8 @@ def run():
     """
     args = parse_args(sys.argv[1:])
     setup_logging(args.loglevel)
+    if not os.path.isdir(args.directory):
+        print("Not a directory")
+        sys.exit(1)
     c = cmd.Cmd(args.directory)
     c.run()
