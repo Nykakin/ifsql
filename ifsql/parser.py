@@ -44,8 +44,7 @@ GRAMMAR = "".join(
         #
         # TODO: support select statements (https://www.sqlite.org/docsrc/doc/trunk/art/syntax/all-bnf.html#select-stmt)
         #   in order to allow subquerying?
-        # TODO: support type casitng?
-        # TODO: support collations
+        # TODO: support type casitng
         """
             !expr: literal_value
                 | column_name
@@ -54,6 +53,7 @@ GRAMMAR = "".join(
                 | expr binary_operator expr
                 | "(" expr ")"
                 | function_name "(" [ [ /distinct/i ] expr_comma | "*" ] ")"
+                | expr /collate/i collation_name
                 | expr [ /not/i ] ( /like/i | /glob/i | /regexp/i | /match/i ) expr [ /escape/i expr ]
                 | expr ( /isnull/i | /notnull/i | /not null/i )
                 | expr /is/i [ /not/i ] expr

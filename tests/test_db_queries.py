@@ -688,3 +688,22 @@ def test_select_datetime_function(fs, database, parser):
 
     assert len(result) == 1
     assert int(result[0].ctime) == datetime.datetime.now().month
+
+
+def test_select_collate(fs, database, parser):
+    import ifsql.database
+    import ifsql.analyse
+
+    path_id_cache = {}
+
+    fs.add_file(path="file1", size=100)
+
+    ifsql.analyse.walk(fs.root, database, path_id_cache)
+
+    query = parser.parse("""
+        SELECT file_name FROM . WHERE file_name = 'fIlE1' COLLATE NOCASE
+    """)
+    result = list(database.query(query, path_id_cache))
+
+    assert len(result) == 1
+    assert result[0].file_name == "file1"
