@@ -159,7 +159,7 @@ class Database:
 
     def query(self, query, path_id_cache):
         # replace from clause into a join with relationship table
-        path_id = path_id_cache.get(query.froms[0].name.rstrip())
+        path_id = path_id_cache.get(query.froms[0].name.strip(" '\""))
         if path_id is None:
             raise DatabaseException("Unknown FROM path")
 
